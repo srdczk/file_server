@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <style>
+        .hide {
+            display: none;
+        }
+    </style>
+    <script src="https://cdn.bootcss.com/jquery/1.10.2/jquery.min.js"></script>
+    <title>File Upload</title>
+</head>
+<body>
+<form id="uploadForm" enctype="multipart/form-data">
+    file:<input id="file" type="file" name="file" onchange="startRead()"/>
+</form>
+<button id="upload" class="hide">upload</button>
+</body>
+<script type="text/javascript">
+    function startRead() {
+        $('#upload').show();
+    }
+    $(function () {
+        $("#upload").click(function () {
+            var formData = new FormData($('#uploadForm')[0]);
+            $.ajax({
+                type: 'post',
+                url: "/file/upload",
+                data: formData,
+                cache: false,
+                processData: false,
+                contentType: false,
+            }).success(function (data) {
+                alert("not fail" + data);
+            }).error(function () {
+                alert("fail");
+            });
+        });
+    });
+</script>
+</html>
