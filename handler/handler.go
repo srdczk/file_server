@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
 )
 
 // update to manage /file/upload
@@ -25,19 +26,33 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		file, header, err := r.FormFile("file")
 		if err != nil {
 			// should return
-			_, _ = io.WriteString(w, "read error")
+			fmt.Println("read form file error: err%s\n", err.Error())
 			return
 		}
-		// test if file upload success
-		fmt.Println(header.Filename)
-		size := 100
-		buffer := make([]byte, size)
-		_, err = file.ReadAt(buffer, int64(size))
+		defer file.Close()
+		path := "./tmp/"
+		_ = os.MkdirAll(path, os.ModePerm)
+
+		newFile, err := os.OpenFile(path + header.Filename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
 		if err != nil {
-			_, _ = io.WriteString(w, "read error")
+			fmt.Println("open or create file error: err%s\n", err.Error())
 			return
 		}
-		fmt.Println(string(buffer))
+
+		_, err = io.Copy(newFile, file)
+		if err != nil {
+			fmt.Println("copy to file error: err%s\n", err.Error())
+			return
+		}
+
+		defer newFile.Close()
 		// learn defer of go
+		h := w.Header()
+		h.Set("REDIRECT", "REDIRECT")
+		h.Set("CONTEXTPATH", "/file/upload/success")
 	}
+}
+// if file load success, redirect to this
+func UploadSuccessHandler(w http.ResponseWriter, r *http.Request) {
+	_, _ = io.WriteString(w, "upload succeed")
 }

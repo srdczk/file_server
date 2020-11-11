@@ -30,8 +30,11 @@
                 cache: false,
                 processData: false,
                 contentType: false,
-            }).success(function (data) {
-                alert("not fail" + data);
+            }).complete(function (xhr, data) {
+                var redirect = xhr.getResponseHeader("REDIRECT");
+                if (redirect === "REDIRECT") {
+                    window.location.href = xhr.getResponseHeader("CONTEXTPATH");
+                }
             }).error(function () {
                 alert("fail");
             });
